@@ -1,0 +1,22 @@
+{
+  "name": "lm-worklog-server",
+  "author": {
+    "name": "Eric McNiece"
+  },
+  "version": "0.0.1",
+  "description": "Polls a team for Toggl entries",
+  "scripts": {
+    "prestart": "mongod --dbpath data --fork --logpath /dev/null",
+    "worker": "node queue-worker.js",
+    "poststop": "mongo admin --eval 'db.shutdownServer()' > /dev/null"
+  },
+  "dependencies": {
+    "async": "^1.4.2",
+    "express": "^4.13.3",
+    "kue": "^0.6.2",
+    "kue-scheduler": "^0.2.1",
+    "lodash": "^3.10.1",
+    "toggl-api": "0.0.3"
+  },
+  "devDependencies": {}
+}
