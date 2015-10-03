@@ -6,3 +6,6 @@
 .idea*
 *.log
 *.swp
+*sublime*
+config.js
+*/*.rdb
