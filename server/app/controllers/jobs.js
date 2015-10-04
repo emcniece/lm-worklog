@@ -3,11 +3,13 @@
  * Module dependencies.
  */
 
-
-//var utils = require('../../lib/utils');
 var MongoClient = require('mongodb').MongoClient;
 var TogglClient = require('toggl-api');
-//var kq = require('../../config/kq');
+var kq = require('../../config/kq');
+
+/* @TODO: Figure out how to share the kq module from server.js in here. */
+console.log( kq.tester() );
+
 
 /**
  * Add

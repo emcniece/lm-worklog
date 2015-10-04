@@ -7,7 +7,7 @@
 // set the NODE_PATH to be ./app/controllers (package.json # scripts # start)
 
 var users = require('../app/controllers/users');
-var kue         = require('kue');
+
 /**
  * Expose routes
  */

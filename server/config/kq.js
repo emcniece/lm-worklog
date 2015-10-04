@@ -30,6 +30,10 @@ function KueQueue(app){
   this.createQueue();
 }
 
+KueQueue.prototype.tester = function tester(){
+  return "yep gj";
+}
+
 // Prototypes
 KueQueue.prototype.createClient = function createClient(){
   kue.redis.createClient = function(){
