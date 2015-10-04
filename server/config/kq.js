@@ -11,37 +11,59 @@ var kue = require('kue');
  * Expose
  */
 
-module.exports = function (app, Queue) {
-
-  // see https://github.com/mranney/node_redis#rediscreateclient
-  kue.redis.createClient = function(){
-      var client = redis.createClient( config.redis.port,config.redis.host);
-      client.auth( config.redis.auth );
-      return client;
-  };
-
-  // Spool a queue - must be done before express
-  Queue = kue.createQueue({
-    prefix: 'q'
-  });
-
-  // /active/ - Let express handle the Kue GUI
-  app.use(kue.app);
-
-  var createQueue = function(jobName){
-    return Queue
-              .createJob( jobName, data)
-              .attempts(1)
-              .delay(10000)
-              .priority('normal');
+// Constructor
+function KueQueue(app){
+  if (!(this instanceof KueQueue)) {
+    c
+    return new KueQueue(app);
   }
 
+  this.Queue = null;
+  this.test = 1234;
+
+  this.createClient();
+  console.log("[SERVICE] Kue connected: " + config.redis.host + ':' + config.redis.port);
+
+  app.use(kue.app);
+  console.log("Kue UI available at [url]:"+config.express.port+"/active/")
+
+  this.createQueue();
+}
+
+// Prototypes
+KueQueue.prototype.createClient = function createClient(){
+  kue.redis.createClient = function(){
+    var client = redis.createClient( config.redis.port,config.redis.host);
+    client.auth( config.redis.auth );
+    return client;
+  };
 };
 
-// Handle the job once it goes through
-exports.process = function(job, done){
+// Spool a queue - must be done before express
+KueQueue.prototype.createQueue = function createQueue(){
+  this.Queue = kue.createQueue({
+    prefix: 'q'
+  });
+  return this.Queue;
+};
 
-    console.log('Job', job.id, 'is done');
-    jobs.add( job.data.user);
-    done && done();
-}
+// Better than any republican on the market
+KueQueue.prototype.createJob = function createJob(){
+  console.log( 'createJob');
+  return this.Queue
+    .createJob( jobName, data)
+    .attempts(1)
+    .delay(10000)
+    .priority('normal');
+};
+
+// Work work...
+KueQueue.prototype.processQueue = function processQueue(job, done){
+  console.log( 'processQueue');
+  console.log('Job', job.id, 'is done');
+  jobs.add( job.data.user);
+  done && done();
+  return done;
+};
+
+module.exports = KueQueue;

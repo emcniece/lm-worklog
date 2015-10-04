@@ -7,7 +7,7 @@
 //var utils = require('../../lib/utils');
 var MongoClient = require('mongodb').MongoClient;
 var TogglClient = require('toggl-api');
-var kq = require('../../config/kq');
+//var kq = require('../../config/kq');
 
 /**
  * Add
@@ -20,7 +20,7 @@ exports.add = function (uid){
 
 
   // unique job creation
-  var job = kq.createQueue(jobName);
+  //var job = kq.createQueue(jobName);
   /*var job = Queue
               .createJob( jobName, data)
               .attempts(1)
@@ -29,6 +29,6 @@ exports.add = function (uid){
 */
   // Schedule!
   job.save();
-  Queue.process(jobName, kq.process);
+  //Queue.process(jobName, kq.process);
   console.log("Job scheduled!");
 };

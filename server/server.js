@@ -3,7 +3,6 @@
 ============================*/
 var basicAuth = require('basic-auth-connect');
 var express     = require('express');
-//var kue         = require('kue');
 var TogglClient = require('toggl-api');
 var MongoClient = require('mongodb').MongoClient;
 var assert      = require('assert');
@@ -24,7 +23,7 @@ server.watch(__dirname);
 var url = 'mongodb://'+config.mongo.user+':'+config.mongo.pass+'@'+config.mongo.server+'/'+config.mongo.db+'';
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log("Connected correctly to mongodb server.");
+  console.log("[SERVICE] Connected correctly to mongodb server.");
   db.close();
 });
 
@@ -39,10 +38,10 @@ MongoClient.connect(url, function(err, db) {
 var app = express();
 var port = process.env.PORT || config.express.port || 3000;
 
-
 // Bootstrap kue
-var Queue;
-require('./config/kq')(app, Queue);
+var KueQueue = require('./config/kq');
+var kq = new KueQueue(app);
+
 
 // Bootstrap application settings
 require('./config/express')(app, express);
