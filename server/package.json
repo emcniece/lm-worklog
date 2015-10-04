@@ -6,9 +6,9 @@
   "version": "0.0.1",
   "description": "Polls a team for Toggl entries",
   "scripts": {
-    "prestart": "mongod --dbpath data --fork --logpath /dev/null",
-    "worker": "node queue-worker.js",
-    "poststop": "mongo admin --eval 'db.shutdownServer()' > /dev/null"
+    "start": "NODE_PATH=./config:./app/controllers NODE_ENV=dev ./node_modules/.bin/nodemon server.js",
+    "winstart": "node server.js",
+    "test": "NODE_PATH=./config:./app/controllers NODE_ENV=test ./node_modules/.bin/mocha --reporter spec --timeout 10000 test/test-*.js"
   },
   "dependencies": {
     "async": "^1.4.2",
@@ -17,7 +17,13 @@
     "kue-scheduler": "^0.2.1",
     "lodash": "^3.10.1",
     "mongodb": "^2.0.45",
+    "redis": "^2.1.0",
     "toggl-api": "0.0.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "supertest": "1.0.1",
+    "should": "7.0.1",
+    "mocha": "2.2.5",
+    "nodemon": "1.3.7"
+  }
 }
