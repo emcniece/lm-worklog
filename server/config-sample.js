@@ -13,6 +13,12 @@ var config = {
     toggl: {
       test1: '8974611fcc012b0d33093da0e2ed8cd5'
       // , test2: '' ...
+    },
+    mongo: {
+      server: 'localhost:27017',
+      db: 'lmserver',
+      user: 'mongoUser',
+      pass: 'mongoPass'
     }
 };
 

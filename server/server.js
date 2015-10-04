@@ -6,11 +6,27 @@ var basicAuth   = require('basic-auth-connect');
 var express     = require('express');
 var kue         = require('kue');
 var TogglClient = require('toggl-api');
+var MongoClient = require('mongodb').MongoClient;
+var assert      = require('assert');
 
-// LiveReload for dev
+
+/*==========================================
+=            LiveReload for Dev            =
+==========================================*/
 livereload = require('livereload');
 server = livereload.createServer();
 server.watch(__dirname);
+
+
+/*======================================
+=            MongoDB Config            =
+======================================*/
+var url = 'mongodb://'+config.mongo.user+':'+config.mongo.pass+'@'+config.mongo.server+'/'+config.mongo.db+'';
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected correctly to mongodb server.");
+  db.close();
+});
 
 
 /*==================================
@@ -23,8 +39,6 @@ var Queue = kue.createQueue({
   prefix: 'q',
   redis: config.redis
 });
-
-// Check for existing jobs and begin processing
 
 
 /*======================================
@@ -41,26 +55,10 @@ app.use(function(req, res, next) {
   next();
 });
 
-// Let express handle the Kue GUI
+// /active/ - Let express handle the Kue GUI
 app.use(kue.app);
 
-// intake of new toggl key
-app.get('/add/', expAddKey);
-app.get('/add/:key', expAddKey);
-function expAddKey(req, res){
-    if( !req.params.key){ res.json({error: 'No key provided'}); return; }
-    var toggl = new TogglClient({apiToken: req.params.key});
-
-    toggl.getUserData( {}, function(status, user){
-        console.log( status, typeof(user) );
-        if(!user){ res.json({error: 'Invalid user'}); }
-        else{
-            newJob( user.id);
-            res.json({success: true, message: "User valid - added job"});
-        }
-    });
-}
-
+// Clear Kue jobs
 app.get('/clear/', expClearQueue);
 app.get('/clear/:state', expClearQueue);
 function expClearQueue(req, res){
@@ -87,6 +85,42 @@ function expClearQueue(req, res){
         });
     });
 }
+
+// intake of new toggl key
+app.get('/users/add/', expAddKey);
+app.get('/users/add/:key', expAddKey);
+function expAddKey(req, res){
+    if( !req.params.key){ res.json({error: 'No key provided'}); return; }
+    var toggl = new TogglClient({apiToken: req.params.key});
+
+    toggl.getUserData( {}, function(status, user){
+        console.log( status, typeof(user) );
+        if(!user){ res.json({error: 'Invalid user'}); }
+        else{
+            newJob( user.id);
+            mdbInsertUser( user);
+            mdbInsertJob({ user: user.id, email: user.email, api_token: user.api_token });
+            res.json({success: true, message: "User valid - added job"});
+        }
+    });
+}
+app.get('/users/delete/:id', function(req, res){});    // @todo
+
+// Jobs
+app.get('/jobs/', expListJobs);
+function expListJobs(req, res){
+
+}
+app.get('/jobs/delete/:id', function(req, res){});    // @todo
+
+// Logs
+app.get('/logs/', expListLogs);
+function expListLogs(req, res){
+
+}
+app.get('/logs/:project', function(req, res){});    // @todo
+
+
 
 // Start the express listener
 app.listen( config.express.port );
@@ -117,6 +151,8 @@ function tgGetDetailedReport(tgid){
 ======================================*/
 
 // This is how jobs are REALLY created, Mr. Trump...
+// This gets called each time a job finishes in order
+// to create a recurring instance.
 function newJob (uid){
 
     // Toggl data?
@@ -142,4 +178,35 @@ function kueJobProcessor(job, done){
     console.log('Job', job.id, 'is done');
     newJob( job.data.user);
     done && done();
+}
+
+
+/*===========================================
+=            MongoDB Interaction            =
+===========================================*/
+var _writeResult = function(err, affected, raw){
+    console.log('Write Result: ', affected.result);
+};
+var _insertDocument = function(collection, data, db, callback) {
+   db.collection( collection ).update(data, data, {upsert: true}, function(err, affected, raw){
+    console.log(collection+' write Result: ', affected.result);
+   });
+};
+
+function mdbInsertUser(user){
+    MongoClient.connect(url, function(err, db) {
+        assert.equal(null, err);
+        _insertDocument('users', user, db, function() {
+            db.close();
+        });
+    });
+}
+
+function mdbInsertJob(job){
+    MongoClient.connect(url, function(err, db) {
+        assert.equal(null, err);
+        _insertDocument('jobs', job, db, function() {
+            db.close();
+        });
+    });
 }
