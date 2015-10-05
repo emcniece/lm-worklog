@@ -8,8 +8,11 @@ var TogglClient = require('toggl-api');
 var kq = require('../../config/kq');
 
 /* @TODO: Figure out how to share the kq module from server.js in here. */
-console.log( kq.tester() );
+console.log('--', kq.newtest );
 
+/* @TODO: PAttern looks promising, but data isn't persisting thru server.js init(4); */
+var sg = require('../../config/singleton-test');
+console.log('-sg jobs: ', sg.test);
 
 /**
  * Add

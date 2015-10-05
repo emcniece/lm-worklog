@@ -39,9 +39,16 @@ var app = express();
 var port = process.env.PORT || config.express.port || 3000;
 
 // Bootstrap kue
-var KueQueue = require('./config/kq');
-var kq = new KueQueue(app);
+var kq = require('./config/kq')(app);
+//var kq = new KueQueue(app);
+console.log('--', kq.newtest)
+kq.test = 5;
+console.log('--', kq.newtest)
 
+var sg = require('./config/singleton-test');
+sg.init(4);
+console.log('-sg: ', sg.test++);
+console.log('-sg: ', sg.test);
 
 // Bootstrap application settings
 require('./config/express')(app, express);

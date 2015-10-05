@@ -13,13 +13,13 @@ var kue = require('kue');
 
 // Constructor
 function KueQueue(app){
-  if (!(this instanceof KueQueue)) {
-    c
-    return new KueQueue(app);
-  }
-
-  this.Queue = null;
-  this.test = 1234;
+  //if (!(this instanceof KueQueue)) {
+  //  return new KueQueue(app);
+  //}
+  var self = this;
+  self.Queue = null;
+  self.test = 1234;
+  self.newtest = 4444;
 
   this.createClient();
   console.log("[SERVICE] Kue connected: " + config.redis.host + ':' + config.redis.port);
@@ -70,4 +70,13 @@ KueQueue.prototype.processQueue = function processQueue(job, done){
   return done;
 };
 
-module.exports = KueQueue;
+//module.exports = KueQueue;
+module.exports = function(app) {
+  //return new KueQueue(app);
+  console.log('Kue INSTANTIATE')
+  if (!(this instanceof KueQueue)) {
+    return new KueQueue(app);
+  } else{
+    console.log('Duplicate: Kue Module instantiation');
+  }
+}
